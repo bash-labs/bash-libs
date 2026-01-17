@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+source "./lib/log.sh"
+
+# log::cfg level=verbose to=file.log
+log::cfg level=verbose
+
+log::info "An info message"
+log::warn "An warn message"
+log::verbose "An verbose message"
+log::error "An error message"

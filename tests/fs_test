@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+source "./lib/fs.sh"
+
+if fs::exists ~/.local; then
+  echo "~/.local: Dir exists"
+else
+  echo "~/.local: Dir not found"
+fi
+
+if fs::is_dir ~/.local; then
+  echo "~/.local: Is dir"
+else
+  echo "~/.local: Is not dir"
+fi
+
+if fs::is_file ~/.bashrc; then
+  echo "~/.bashrc: Is file"
+else
+  echo "~/.bashrc: File not found"
+fi
+
+echo $(fs::abs ~/../..)
+
+# fs::read ~/.bashrc
+
+fs::size ~/.bashrc
+fs::mtime ~/.bashrc
+
+fs::ls .
+
+# fs::tmpfile "test"
+
+# walk_handler() {
+#   echo "$1"
+# }
+# fs::walk ../ walk_handler

@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+source "./lib/string.sh"
+
+echo "------------"
+echo "Split test"
+echo "------------"
+
+declare -a parts
+string::split parts ':' "a:b:c:d"
+
+echo "${parts[0]}"
+echo "${parts[1]}"
+echo "${parts[2]}"
+echo "${parts[3]}"
+
+echo "------------"
+
+echo "------------"
+echo "Join test"
+echo "------------"
+
+join_result=$(string::join parts ".")
+
+echo "Join result: ${join_result}" 
+
+echo "------------"
+
+echo "------------"
+echo "Replace test"
+echo "------------"
+
+url="https://github.com/TNT-Bots/tnt-tg-bot"
+new_url=$(string::replace $url "TNT-Bots" "uriid1")
+
+echo "Old Url: $url"
+echo "New Url: $new_url"
+
+echo "------------"
