@@ -61,7 +61,6 @@
   - [x] `fs::ls`
   - [x] `fs::walk`
   - [x] `fs::hash`
-  - [x] `fs::hash`
 
 **Упрощённый доступ к JSON через jq**
 - [x] `lib/jsonq.sh`

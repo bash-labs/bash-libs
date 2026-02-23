@@ -173,25 +173,3 @@ fs::hash() {
       ;;
   esac
 }
-
-fs::hash() {
-  local path="$1"
-  local algo="${2:-sha256}"
-
-  fs::is_file || return 1
-
-  case "$algo" in
-    sha256)
-      sha256sum "$path" | awk '{print $1}'
-      ;;
-    sha1)
-      sha1sum "$path" | awk '{print $1}'
-      ;;
-    md5)
-      md5sum "$path" | awk '{print $1}'
-      ;;
-    *)
-      return 1
-      ;;
-  esac
-}

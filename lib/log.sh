@@ -46,7 +46,7 @@ log::cfg() {
       ;;
 
       to)
-        if [[ -n "$value:-" ]]; then
+        if [[ -n "${value:-}" ]]; then
           exec 3>>"$value"
           __log_env[FD_STDERR]=3
           __log_env[FD_STDOUT]=3
@@ -61,7 +61,7 @@ __log_colorise() {
   shift
 
   if (( __log_env[FD_STDOUT] > 2 )); then
-    printf "$*"
+    printf '%s' "$*"
     return 1
   fi
 
@@ -70,21 +70,21 @@ __log_colorise() {
 
 log::error() {
   (( __log_env[LEVEL] < 0 )) && return
-  echo -e "[$(date +'%Y-%m-%dT%H:%M:%S%z')] E> $(__log_colorise ${C_RED} $*)" >&${__log_env[FD_STDERR]}
+  echo -e "[$(date +'%Y-%m-%dT%H:%M:%S%z')] E> $(__log_colorise "${C_RED}" "$*")" >&${__log_env[FD_STDERR]}
 }
 
 log::warn() {
   (( __log_env[LEVEL] < 1 )) && return
   echo -e \
-  "[$(date +'%Y-%m-%dT%H:%M:%S%z')] W> $(__log_colorise ${C_YELLOW} $*)" >&${__log_env[FD_STDOUT]}
+  "[$(date +'%Y-%m-%dT%H:%M:%S%z')] W> $(__log_colorise "${C_YELLOW}" "$*")" >&${__log_env[FD_STDOUT]}
 }
 
 log::info() {
   (( __log_env[LEVEL] < 2 )) && return
-  echo -e "[$(date +'%Y-%m-%dT%H:%M:%S%z')] I> $(__log_colorise ${C_GREEN} $*)" >&${__log_env[FD_STDOUT]}
+  echo -e "[$(date +'%Y-%m-%dT%H:%M:%S%z')] I> $(__log_colorise "${C_GREEN}" "$*")" >&${__log_env[FD_STDOUT]}
 }
 
 log::verbose() {
   (( __log_env[LEVEL] < 3 )) && return
-  echo -e "[$(date +'%Y-%m-%dT%H:%M:%S%z')] V> $(__log_colorise ${C_MAGENTA} $*)" >&${__log_env[FD_STDOUT]}
+  echo -e "[$(date +'%Y-%m-%dT%H:%M:%S%z')] V> $(__log_colorise "${C_MAGENTA}" "$*")" >&${__log_env[FD_STDOUT]}
 }
