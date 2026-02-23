@@ -1,0 +1,128 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+source "./lib/jsonq.sh"
+
+JSON='{"name":"alice","age":30,"active":true,"score":null,"tags":["go","bash"]}'
+
+echo "------------"
+echo "jsonq::get test (from string)"
+echo "------------"
+
+name=$(jsonq::get "$JSON" '.name')
+if [[ "$name" == "alice" ]]; then
+  echo "PASS - string field"
+else
+  echo "FAIL - expected 'alice', got '$name'"
+fi
+
+age=$(jsonq::get "$JSON" '.age')
+if [[ "$age" == "30" ]]; then
+  echo "PASS - number field"
+else
+  echo "FAIL - expected '30', got '$age'"
+fi
+
+active=$(jsonq::get "$JSON" '.active')
+if [[ "$active" == "true" ]]; then
+  echo "PASS - boolean field"
+else
+  echo "FAIL - expected 'true', got '$active'"
+fi
+
+tag=$(jsonq::get "$JSON" '.tags[1]')
+if [[ "$tag" == "bash" ]]; then
+  echo "PASS - array index"
+else
+  echo "FAIL - expected 'bash', got '$tag'"
+fi
+
+echo "------------"
+echo "jsonq::get test (from file)"
+echo "------------"
+
+tmpfile=$(mktemp)
+printf '%s' "$JSON" > "$tmpfile"
+
+name_from_file=$(jsonq::get "$tmpfile" '.name')
+if [[ "$name_from_file" == "alice" ]]; then
+  echo "PASS - read from file"
+else
+  echo "FAIL - expected 'alice', got '$name_from_file'"
+fi
+
+rm -f "$tmpfile"
+
+echo "------------"
+echo "jsonq::set test (string auto-detect)"
+echo "------------"
+
+# Bare string (не JSON) → строка
+out=$(jsonq::set "$JSON" '.name' 'bob')
+val=$(jsonq::get "$out" '.name')
+if [[ "$val" == "bob" ]]; then
+  echo "PASS - bare string set as string"
+else
+  echo "FAIL - expected 'bob', got '$val'"
+fi
+
+echo "------------"
+echo "jsonq::set test (typed values)"
+echo "------------"
+
+# Число
+out=$(jsonq::set "$JSON" '.age' '99')
+val=$(jsonq::get "$out" '.age')
+if [[ "$val" == "99" ]]; then
+  echo "PASS - number"
+else
+  echo "FAIL - expected '99', got '$val'"
+fi
+
+# Boolean
+out=$(jsonq::set "$JSON" '.active' 'false')
+val=$(jsonq::get "$out" '.active')
+if [[ "$val" == "false" ]]; then
+  echo "PASS - boolean"
+else
+  echo "FAIL - expected 'false', got '$val'"
+fi
+
+# null
+out=$(jsonq::set "$JSON" '.name' 'null')
+val=$(jsonq::get "$out" '.name')
+if [[ "$val" == "null" ]]; then
+  echo "PASS - null"
+else
+  echo "FAIL - expected 'null', got '$val'"
+fi
+
+# Объект
+out=$(jsonq::set "$JSON" '.meta' '{"version":1}')
+val=$(jsonq::get "$out" '.meta.version')
+if [[ "$val" == "1" ]]; then
+  echo "PASS - nested object"
+else
+  echo "FAIL - expected '1', got '$val'"
+fi
+
+echo "------------"
+echo "jsonq::set test (from file)"
+echo "------------"
+
+tmpfile=$(mktemp)
+printf '%s' "$JSON" > "$tmpfile"
+
+out=$(jsonq::set "$tmpfile" '.name' 'carol')
+val=$(jsonq::get "$out" '.name')
+if [[ "$val" == "carol" ]]; then
+  echo "PASS - set from file"
+else
+  echo "FAIL - expected 'carol', got '$val'"
+fi
+
+rm -f "$tmpfile"
+
+echo "------------"
+echo "All tests done"
+echo "------------"

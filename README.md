@@ -60,10 +60,10 @@
   - [x] `fs::hash`
   - [x] `fs::hash`
 
-**Упрощенный доступ к json через jq**
-- [ ] `lib/jsonq.sh`
-  - [ ] `jsonq::get`
-  - [ ] `jsonq::set`
+**Упрощённый доступ к JSON через jq**
+- [x] `lib/jsonq.sh`
+  - [x] `jsonq::get`
+  - [x] `jsonq::set`
 
 **key value parser (deprecated)**
 - [x] `lib/kv.sh`
