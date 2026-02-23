@@ -1,0 +1,96 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+source "./lib/sys.sh"
+
+echo "------------"
+echo "sys::os test"
+echo "------------"
+
+os=$(sys::os)
+echo "os: $os"
+
+if [[ "$os" =~ ^(linux|darwin|windows|unknown)$ ]]; then
+  echo "PASS - valid os value"
+else
+  echo "FAIL - unexpected value: $os"
+fi
+
+echo "------------"
+echo "sys::arch test"
+echo "------------"
+
+arch=$(sys::arch)
+echo "arch: $arch"
+
+if [[ "$arch" =~ ^(x86_64|arm64|arm|i386|unknown)$ ]]; then
+  echo "PASS - valid arch value"
+else
+  echo "FAIL - unexpected value: $arch"
+fi
+
+echo "------------"
+echo "sys::uptime test"
+echo "------------"
+
+uptime_sec=$(sys::uptime)
+echo "uptime: ${uptime_sec}s"
+
+if [[ "$uptime_sec" =~ ^[0-9]+$ ]] && (( uptime_sec > 0 )); then
+  echo "PASS - uptime is a positive integer"
+else
+  echo "FAIL - unexpected value: $uptime_sec"
+fi
+
+echo "------------"
+echo "sys::mem test"
+echo "------------"
+
+mem_total=$(sys::mem total)
+mem_free=$(sys::mem free)
+mem_avail=$(sys::mem available)
+
+echo "total:     ${mem_total} kB"
+echo "free:      ${mem_free} kB"
+echo "available: ${mem_avail} kB"
+
+if [[ "$mem_total" =~ ^[0-9]+$ ]] && (( mem_total > 0 )); then
+  echo "PASS - mem total is positive"
+else
+  echo "FAIL - unexpected total: $mem_total"
+fi
+
+if (( mem_free <= mem_total )); then
+  echo "PASS - free <= total"
+else
+  echo "FAIL - free > total"
+fi
+
+if (( mem_avail <= mem_total )); then
+  echo "PASS - available <= total"
+else
+  echo "FAIL - available > total"
+fi
+
+if ! sys::mem unknown 2>/dev/null; then
+  echo "PASS - unknown field returns error"
+else
+  echo "FAIL - expected error for unknown field"
+fi
+
+echo "------------"
+echo "sys::cpu_cores test"
+echo "------------"
+
+cores=$(sys::cpu_cores)
+echo "cpu_cores: $cores"
+
+if [[ "$cores" =~ ^[0-9]+$ ]] && (( cores > 0 )); then
+  echo "PASS - cpu_cores is a positive integer"
+else
+  echo "FAIL - unexpected value: $cores"
+fi
+
+echo "------------"
+echo "All tests done"
+echo "------------"

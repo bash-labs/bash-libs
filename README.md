@@ -119,12 +119,12 @@
   - [x] `string::replace`
 
 **Унификация доступа к системе**
-- [ ] `lib/sys.sh`
-  - [ ] `sys::os`
-  - [ ] `sys::arch`
-  - [ ] `sys::uptime`
-  - [ ] `sys::mem`
-  - [ ] `sys::cpu_cores`
+- [x] `lib/sys.sh`
+  - [x] `sys::os`
+  - [x] `sys::arch`
+  - [x] `sys::uptime`
+  - [x] `sys::mem`
+  - [x] `sys::cpu_cores`
 
 **Измерения и таймауты без date-магии**
 - [ ] `lib/time.sh`
