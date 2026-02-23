@@ -67,7 +67,8 @@
 
 **key value parser (deprecated)**
 - [x] `lib/kv.sh`
-  - [x] `kv_eq::parse`
+  - [x] `kv::parse`
+  - [x] `kv::build_json`
 
 **Защита от race condition**
 - [ ] `lib/lock.sh`

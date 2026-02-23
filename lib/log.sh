@@ -53,7 +53,7 @@ log::cfg() {
         fi
       ;;
     esac
-  done < <(kv_eq::parse "$@") || return 1
+  done < <(kv::parse "$@") || return 1
 }
 
 __log_colorise() {
