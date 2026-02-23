@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+source "./lib/proc.sh"
+
+echo "------------"
+echo "is_running test"
+echo "------------"
+
+sleep 10 &
+bg_pid=$!
+
+if proc::is_running "$bg_pid"; then
+  echo "PASS - process is running"
+else
+  echo "FAIL - expected running process"
+fi
+
+kill "$bg_pid" 2>/dev/null
+wait "$bg_pid" 2>/dev/null || true
+sleep 0.1
+
+if ! proc::is_running "$bg_pid"; then
+  echo "PASS - process stopped after kill"
+else
+  echo "FAIL - expected process to be stopped"
+fi
+
+echo "------------"
+echo "wait test (no timeout)"
+echo "------------"
+
+sleep 0.3 &
+w_pid=$!
+proc::wait "$w_pid"
+echo "PASS - wait returned after process ended"
+
+echo "------------"
+echo "wait test (with timeout)"
+echo "------------"
+
+sleep 30 &
+t_pid=$!
+
+if ! proc::wait "$t_pid" 1; then
+  echo "PASS - wait timed out as expected"
+else
+  echo "FAIL - expected timeout"
+fi
+
+kill "$t_pid" 2>/dev/null || true
+wait "$t_pid" 2>/dev/null || true
+
+echo "------------"
+echo "kill_tree test"
+echo "------------"
+
+bash -c 'sleep 30 & sleep 30 & wait' &
+tree_root=$!
+sleep 0.2
+
+children=$(pgrep -P "$tree_root" 2>/dev/null || true)
+
+proc::kill_tree "$tree_root" KILL
+sleep 0.3
+
+alive=0
+for p in $tree_root $children; do
+  if proc::is_running "$p" 2>/dev/null; then
+    alive=$(( alive + 1 ))
+  fi
+done
+
+if (( alive == 0 )); then
+  echo "PASS - process tree killed"
+else
+  echo "FAIL - ${alive} processes still alive"
+fi
+
+echo "------------"
+echo "on_exit test"
+echo "------------"
+
+_exit_file=$(mktemp)
+
+__PROC_TEST_FILE="$_exit_file" bash -c "
+  source './lib/proc.sh'
+  _handler() { echo 'called' > \"\$__PROC_TEST_FILE\"; }
+  proc::on_exit _handler
+"
+
+_content=$(cat "$_exit_file")
+if [[ "$_content" == "called" ]]; then
+  echo "PASS - exit handler was called"
+else
+  echo "FAIL - exit handler was not called"
+fi
+
+rm -f "$_exit_file"
+
+echo "------------"
+echo "All tests done"
+echo "------------"

@@ -100,12 +100,12 @@
   - [x] `net::http_server`
 
 **Корректное управление дочерними процессами**
-- [ ] `lib/proc.sh`
-  - [ ] `proc::is_running`
-  - [ ] `proc::wait`
-  - [ ] `proc::kill_tree`
-  - [ ] `proc::on_exit`
-  - [ ] `proc::daemonize`
+- [x] `lib/proc.sh`
+  - [x] `proc::is_running`
+  - [x] `proc::wait`
+  - [x] `proc::kill_tree`
+  - [x] `proc::on_exit`
+  - [x] `proc::daemonize`
 
 **Вспомогательный модуль для строк**
 - [x] `lib/string.sh`

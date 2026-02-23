@@ -100,7 +100,6 @@ net::http_post() {
 #   echo "response"
 # }
 ########################################
-
 net::tcp_server() {
   local port="$1"
   local handler="$2"
@@ -122,7 +121,6 @@ net::tcp_server() {
 #
 # handler_fn <method> <path>
 ########################################
-
 net::http_server() {
   local port="$1"
   local handler="$2"
