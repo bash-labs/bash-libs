@@ -126,9 +126,8 @@
   - [x] `sys::mem`
   - [x] `sys::cpu_cores`
 
-**Измерения и таймауты без date-магии**
-- [ ] `lib/time.sh`
-  - [ ] `time::now`
-  - [ ] `time::sleep_ms`
-  - [ ] `time::measure`
-  - [ ] `time::timeout`
+**Измерения без date-магии**
+- [x] `lib/time.sh`
+  - [x] `time::now`
+  - [x] `time::sleep_ms`
+  - [x] `time::measure`

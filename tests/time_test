@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+source "./lib/time.sh"
+
+echo "------------"
+echo "time::now test"
+echo "------------"
+
+t=$(time::now)
+echo "now: $t"
+
+if [[ "$t" =~ ^[0-9]{13,}$ ]]; then
+  echo "PASS - 13-digit ms timestamp"
+else
+  echo "FAIL - unexpected value: $t"
+fi
+
+# Два последовательных вызова должны давать возрастающие значения
+t1=$(time::now)
+t2=$(time::now)
+if (( t2 >= t1 )); then
+  echo "PASS - time is monotonically non-decreasing"
+else
+  echo "FAIL - t2 < t1 ($t2 < $t1)"
+fi
+
+echo "------------"
+echo "time::sleep_ms test"
+echo "------------"
+
+before=$(time::now)
+time::sleep_ms 200
+after=$(time::now)
+
+elapsed=$(( after - before ))
+echo "sleep 200ms, elapsed: ${elapsed}ms"
+
+if (( elapsed >= 190 && elapsed <= 500 )); then
+  echo "PASS - sleep duration in range [190, 500]ms"
+else
+  echo "FAIL - elapsed out of range: ${elapsed}ms"
+fi
+
+echo "------------"
+echo "time::measure test"
+echo "------------"
+
+_work() {
+  time::sleep_ms 150
+}
+
+duration=$(time::measure _work)
+echo "measure _work: ${duration}ms"
+
+if (( duration >= 130 && duration <= 500 )); then
+  echo "PASS - measured duration in range [130, 500]ms"
+else
+  echo "FAIL - duration out of range: ${duration}ms"
+fi
+
+echo "------------"
+echo "All tests done"
+echo "------------"
