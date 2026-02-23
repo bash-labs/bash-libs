@@ -1,11 +1,11 @@
 # Вспомогательные библиотеки для bash скриптинга
 
 **Декларативный парсинг "$@"**
-- [ ] `lib/arg.sh`
-  - [ ] `arg::parse`
-  - [ ] `arg::has`
-  - [ ] `arg::get`
-  - [ ] `arg::rest`
+- [x] `lib/arg.sh`
+  - [x] `arg::parse`
+  - [x] `arg::has`
+  - [x] `arg::get`
+  - [x] `arg::rest`
 
 **fail-fast подход**
 - [ ] `lib/assert.sh`

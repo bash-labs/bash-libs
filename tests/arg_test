@@ -1,0 +1,154 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+source "./lib/arg.sh"
+
+echo "------------"
+echo "flags test"
+echo "------------"
+
+arg::parse --verbose -q
+
+if arg::has --verbose; then
+  echo "PASS - --verbose flag"
+else
+  echo "FAIL - --verbose not found"
+fi
+
+if arg::has -q; then
+  echo "PASS - -q short flag"
+else
+  echo "FAIL - -q not found"
+fi
+
+if ! arg::has --quiet; then
+  echo "PASS - --quiet absent"
+else
+  echo "FAIL - --quiet should not be set"
+fi
+
+echo "------------"
+echo "-k value test (short opts)"
+echo "------------"
+
+arg::parse --name=alice -o /tmp/out.txt
+
+val=$(arg::get --name)
+if [[ "$val" == "alice" ]]; then
+  echo "PASS - --name=alice"
+else
+  echo "FAIL - expected 'alice', got '$val'"
+fi
+
+val=$(arg::get -o)
+if [[ "$val" == "/tmp/out.txt" ]]; then
+  echo "PASS - -o /tmp/out.txt"
+else
+  echo "FAIL - expected '/tmp/out.txt', got '$val'"
+fi
+
+echo "------------"
+echo "--key=value test"
+echo "------------"
+
+arg::parse --output=/tmp/result.txt --level=3
+
+val=$(arg::get --output)
+if [[ "$val" == "/tmp/result.txt" ]]; then
+  echo "PASS - --output=/tmp/result.txt"
+else
+  echo "FAIL - expected '/tmp/result.txt', got '$val'"
+fi
+
+val=$(arg::get --level)
+if [[ "$val" == "3" ]]; then
+  echo "PASS - --level=3"
+else
+  echo "FAIL - expected '3', got '$val'"
+fi
+
+echo "------------"
+echo "default value test"
+echo "------------"
+
+arg::parse --name=bob
+
+val=$(arg::get --missing fallback)
+if [[ "$val" == "fallback" ]]; then
+  echo "PASS - default value returned"
+else
+  echo "FAIL - expected 'fallback', got '$val'"
+fi
+
+val=$(arg::get --name default_ignored)
+if [[ "$val" == "bob" ]]; then
+  echo "PASS - default ignored when key present"
+else
+  echo "FAIL - expected 'bob', got '$val'"
+fi
+
+echo "------------"
+echo "positional args test"
+echo "------------"
+
+arg::parse --verbose file1.txt file2.txt file3.txt
+
+mapfile -t rest < <(arg::rest)
+
+if [[ "${#rest[@]}" -eq 3 ]]; then
+  echo "PASS - 3 positional args"
+else
+  echo "FAIL - expected 3, got ${#rest[@]}"
+fi
+
+if [[ "${rest[0]}" == "file1.txt" && "${rest[2]}" == "file3.txt" ]]; then
+  echo "PASS - positional args order preserved"
+else
+  echo "FAIL - wrong order: ${rest[*]}"
+fi
+
+echo "------------"
+echo "-- separator test"
+echo "------------"
+
+arg::parse --verbose -- --not-a-flag positional
+
+if arg::has --verbose; then
+  echo "PASS - --verbose before -- is a flag"
+else
+  echo "FAIL - --verbose not detected"
+fi
+
+if ! arg::has --not-a-flag; then
+  echo "PASS - --not-a-flag after -- is not a flag"
+else
+  echo "FAIL - --not-a-flag should be positional"
+fi
+
+mapfile -t rest < <(arg::rest)
+if [[ "${#rest[@]}" -eq 2 && "${rest[0]}" == "--not-a-flag" ]]; then
+  echo "PASS - args after -- are positional"
+else
+  echo "FAIL - wrong rest: ${rest[*]:-}"
+fi
+
+echo "------------"
+echo "mixed test"
+echo "------------"
+
+arg::parse -v --name=world --output=/dev/null -- extra
+
+if arg::has -v; then echo "PASS - -v"; else echo "FAIL - -v"; fi
+
+val=$(arg::get --name)
+if [[ "$val" == "world" ]]; then echo "PASS - --name=world"; else echo "FAIL - name '$val'"; fi
+
+val=$(arg::get --output)
+if [[ "$val" == "/dev/null" ]]; then echo "PASS - --output=/dev/null"; else echo "FAIL - output '$val'"; fi
+
+mapfile -t rest < <(arg::rest)
+if [[ "${rest[0]}" == "extra" ]]; then echo "PASS - extra is positional"; else echo "FAIL - rest '${rest[*]:-}'"; fi
+
+echo "------------"
+echo "All tests done"
+echo "------------"
