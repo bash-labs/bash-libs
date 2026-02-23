@@ -57,7 +57,7 @@ fs::mkdir_p() {
 fs::read() {
   local path="$1"
 
-  fs::is_file $path || return 1
+  fs::is_file "$path" || return 1
 
   cat "$path"
 }
