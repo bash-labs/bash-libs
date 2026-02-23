@@ -1,0 +1,114 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+source "./lib/lock.sh"
+
+echo "------------"
+echo "lock::acquire / release test"
+echo "------------"
+
+lock::acquire "basic"
+
+lockfile="${TMPDIR:-/tmp}/.lock_basic"
+if [[ -f "$lockfile" ]]; then
+  echo "PASS - lock file created"
+else
+  echo "FAIL - lock file not found"
+fi
+
+lock::release "basic"
+
+if [[ ! -f "$lockfile" ]]; then
+  echo "PASS - lock file removed after release"
+else
+  echo "FAIL - lock file still exists after release"
+fi
+
+echo "------------"
+echo "lock::acquire timeout test (mutual exclusion)"
+echo "------------"
+
+# Дочерний процесс захватывает лок и держит 0.5s
+(
+  lock::acquire "mutex"
+  sleep 0.5
+  lock::release "mutex"
+) &
+holder=$!
+
+sleep 0.1  # Дождаться захвата лока дочерним процессом
+
+# Попытка неблокирующего захвата должна завершиться неудачей
+if ! lock::acquire "mutex" 0; then
+  echo "PASS - non-blocking acquire failed on held lock"
+else
+  lock::release "mutex"
+  echo "FAIL - should not have acquired held lock"
+fi
+
+wait $holder
+
+# После завершения держателя лок должен освободиться
+if lock::acquire "mutex" 1; then
+  lock::release "mutex"
+  echo "PASS - lock acquired after holder exited"
+else
+  echo "FAIL - could not acquire lock after holder exited"
+fi
+
+echo "------------"
+echo "lock::with test"
+echo "------------"
+
+_result_file=$(mktemp)
+
+_worker() {
+  echo "done" > "$_result_file"
+}
+
+lock::with "with_test" _worker
+
+if [[ "$(cat "$_result_file")" == "done" ]]; then
+  echo "PASS - function executed under lock"
+else
+  echo "FAIL - function did not run"
+fi
+
+# Лок должен быть освобождён после lock::with
+if lock::acquire "with_test" 0; then
+  lock::release "with_test"
+  echo "PASS - lock released after lock::with"
+else
+  echo "FAIL - lock still held after lock::with"
+fi
+
+rm -f "$_result_file"
+
+echo "------------"
+echo "lock::with error propagation test"
+echo "------------"
+
+_failing() {
+  return 42
+}
+
+rc=0
+lock::with "err_test" _failing || rc=$?
+
+if (( rc == 42 )); then
+  echo "PASS - exit code propagated"
+else
+  echo "FAIL - expected 42, got $rc"
+fi
+
+# Лок должен быть освобождён даже после ошибки
+if lock::acquire "err_test" 0; then
+  lock::release "err_test"
+  echo "PASS - lock released after failed fn"
+else
+  echo "FAIL - lock still held after failed fn"
+fi
+
+echo "------------"
+echo "All tests done"
+echo "------------"

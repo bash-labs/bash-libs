@@ -71,10 +71,10 @@
   - [x] `kv::build_json`
 
 **Защита от race condition**
-- [ ] `lib/lock.sh`
-  - [ ] `lock::acquire`
-  - [ ] `lock::release`
-  - [ ] `lock::with`
+- [x] `lib/lock.sh`
+  - [x] `lock::acquire`
+  - [x] `lock::release`
+  - [x] `lock::with`
 
 **Минималистичнй логгер**
 - [x] `lib/log.sh`
