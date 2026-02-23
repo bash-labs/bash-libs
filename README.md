@@ -1,5 +1,8 @@
 # Вспомогательные библиотеки для bash скриптинга
 
+> [!NOTE]
+> Часть модулей и тестов сгенерирована с помощью [Claude Code](https://claude.ai/claude-code) (Anthropic).
+
 **Декларативный парсинг "$@"**
 - [x] `lib/arg.sh`
   - [x] `arg::parse`
