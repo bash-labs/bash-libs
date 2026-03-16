@@ -29,6 +29,12 @@ kv::parse() {
 
 ########################################
 # Построение JSON из аргументов
+# Поддерживает:
+#   - строки:    "name=Ivan"
+#   - числа:     "id=123", "price=89.5"
+#   - boolean:   "active=true", "active=false"
+#   - массивы:   'photos=["url1","url2"]'
+#   - null:      "field=null"
 # Arguments:
 #   args - аргументы вида "key=value"
 # Returns:
@@ -45,9 +51,22 @@ kv::build_json() {
       json+=","
     fi
 
-    # Проверка, является ли значение числом
-    if [[ "$value" =~ ^[0-9]+$ ]]; then
+    # Массив — значение начинается с [
+    if [[ "$value" == \[* ]]; then
       json+="\"$key\":$value"
+    # null
+    elif [[ "$value" == "null" ]]; then
+      json+="\"$key\":null"
+    # boolean
+    elif [[ "$value" == "true" || "$value" == "false" ]]; then
+      json+="\"$key\":$value"
+    # Целое число
+    elif [[ "$value" =~ ^[0-9]+$ ]]; then
+      json+="\"$key\":$value"
+    # Дробное число
+    elif [[ "$value" =~ ^[0-9]+\.[0-9]+$ ]]; then
+      json+="\"$key\":$value"
+    # Строка
     else
       json+="\"$key\":\"$value\""
     fi
