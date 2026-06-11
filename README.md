@@ -1,14 +1,18 @@
 # Вспомогательные библиотеки для bash скриптинга
 
 > [!NOTE]
-> Часть модулей и тестов сгенерирована с помощью [Claude Code](https://claude.ai/claude-code) (Anthropic).
+> Часть модулей и тестов сгенерирована с помощью [Claude Code](https://claude.ai/) (Anthropic).
 
 **Декларативный парсинг "$@"**
 - [x] `lib/arg.sh`
+  - [x] `arg::spec` — объявить опцию: `arg::spec <flag|value|list> <canonical> [aliases...]`
   - [x] `arg::parse`
   - [x] `arg::has`
   - [x] `arg::get`
+  - [x] `arg::list` — значения `list`-опции (по строке)
   - [x] `arg::rest`
+  - [x] `arg::reset`
+  - Форматы: `--flag`, `-f`, `--key value`, `--key=value`, `-k value`, многозначные `--key v1 v2 ...` (через `list`), многобуквенные короткие опции и алиасы (через `arg::spec`). Без `arg::spec` — совместимо со старым эвристическим разбором.
 
 **fail-fast подход**
 - [ ] `lib/assert.sh`

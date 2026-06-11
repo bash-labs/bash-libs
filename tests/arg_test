@@ -150,5 +150,113 @@ mapfile -t rest < <(arg::rest)
 if [[ "${rest[0]}" == "extra" ]]; then echo "PASS - extra is positional"; else echo "FAIL - rest '${rest[*]:-}'"; fi
 
 echo "------------"
+echo "spec: value (--key value)"
+echo "------------"
+
+arg::reset
+arg::spec value --process
+arg::spec flag --start
+arg::spec flag --stop
+
+arg::parse --process ./mybin --start
+
+val=$(arg::get --process)
+if [[ "$val" == "./mybin" ]]; then
+  echo "PASS - --process ./mybin"
+else
+  echo "FAIL - expected './mybin', got '$val'"
+fi
+
+if arg::has --start; then
+  echo "PASS - --start present"
+else
+  echo "FAIL - --start should be present"
+fi
+
+if ! arg::has --stop; then
+  echo "PASS - --stop absent"
+else
+  echo "FAIL - --stop should be absent"
+fi
+
+echo "------------"
+echo "spec: list (multi-value) + value stop-word + aliases"
+echo "------------"
+
+arg::reset
+arg::spec list --domains -d
+arg::spec list --chains -c
+arg::spec value --interface -i
+
+arg::parse --domains site-one.com site-two.com --interface enp7s0 --chains FORWARD OUTPUT INPUT
+
+mapfile -t doms < <(arg::list --domains)
+if [[ "${#doms[@]}" -eq 2 && "${doms[1]}" == "site-two.com" ]]; then
+  echo "PASS - --domains collected 2 values"
+else
+  echo "FAIL - domains: ${doms[*]:-}"
+fi
+
+val=$(arg::get --interface)
+if [[ "$val" == "enp7s0" ]]; then
+  echo "PASS - --interface stops list collection"
+else
+  echo "FAIL - expected 'enp7s0', got '$val'"
+fi
+
+mapfile -t chs < <(arg::list --chains)
+if [[ "${#chs[@]}" -eq 3 && "${chs[2]}" == "INPUT" ]]; then
+  echo "PASS - --chains collected 3 values"
+else
+  echo "FAIL - chains: ${chs[*]:-}"
+fi
+
+# alias -d -> --domains
+arg::parse -d a.com b.com
+mapfile -t doms < <(arg::list -d)
+if [[ "${#doms[@]}" -eq 2 ]]; then
+  echo "PASS - alias -d resolves to --domains"
+else
+  echo "FAIL - alias -d: ${doms[*]:-}"
+fi
+
+echo "------------"
+echo "spec: multi-char short options + aliases"
+echo "------------"
+
+arg::reset
+arg::spec value --find-path -fp -FP
+arg::spec value --iso -i -I
+
+arg::parse -fp /home/user -I /x/y.iso
+
+val=$(arg::get --find-path)
+if [[ "$val" == "/home/user" ]]; then
+  echo "PASS - -fp multi-char short value"
+else
+  echo "FAIL - expected '/home/user', got '$val'"
+fi
+
+val=$(arg::get --iso)
+if [[ "$val" == "/x/y.iso" ]]; then
+  echo "PASS - -I alias resolves to --iso"
+else
+  echo "FAIL - expected '/x/y.iso', got '$val'"
+fi
+
+echo "------------"
+echo "reset restores no-spec (heuristic) behavior"
+echo "------------"
+
+arg::reset
+arg::parse --verbose file1.txt file2.txt
+mapfile -t rest < <(arg::rest)
+if arg::has --verbose && [[ "${#rest[@]}" -eq 2 ]]; then
+  echo "PASS - after reset --verbose is flag, 2 positionals"
+else
+  echo "FAIL - reset behavior: has=$(arg::has --verbose; echo $?), rest=${rest[*]:-}"
+fi
+
+echo "------------"
 echo "All tests done"
 echo "------------"
