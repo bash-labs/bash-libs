@@ -5,8 +5,14 @@
 [[ -n "${LOG_SH_LOADED:-}" ]] && return
 readonly LOG_SH_LOADED=1
 
-source "$(dirname "${BASH_SOURCE[0]}")/colors.sh"
-source "$(dirname "${BASH_SOURCE[0]}")/kv.sh"
+#
+# Colors
+#
+readonly C_DEF='\033[0m'
+readonly C_RED='\033[31m'
+readonly C_GREEN='\033[32m'
+readonly C_YELLOW='\033[33m'
+readonly C_MAGENTA='\033[35m'
 
 #
 # Module ENV
@@ -39,7 +45,10 @@ __level_to_num() {
 #   None
 ########################################
 log::cfg() {
-  while IFS=$'\t' read -r key value; do
+  local arg key value
+  for arg in "$@"; do
+    key="${arg%%=*}"
+    value="${arg#*=}"
     case "${key}" in
       level)
         __log_env[LEVEL]=$(__level_to_num "${value}")
@@ -53,7 +62,7 @@ log::cfg() {
         fi
       ;;
     esac
-  done < <(kv::parse "$@") || return 1
+  done
 }
 
 __log_colorise() {
